@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/claude-light-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="IB Tracker"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#FAF9F5"><meta name="description" content="IB Tracker: your IB timetable, tasks, tests and coursework, on your phone."><script>window.__IBWEB_BUILT="2026-11-07T16:26:34Z";document.documentElement.classList.add("ibweb");if(matchMedia("(max-width: 620px)").matches)document.documentElement.classList.add("ibphone");</script><style id="ibPhoneCss">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/claude-light-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="IB Tracker"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#FAF9F5"><meta name="description" content="IB Tracker: your IB timetable, tasks, tests and coursework, on your phone."><script>window.__IBWEB_BUILT="2026-11-07T17:00:54Z";document.documentElement.classList.add("ibweb");if(matchMedia("(max-width: 620px)").matches)document.documentElement.classList.add("ibphone");</script><style id="ibPhoneCss">
 /* ================= IB Tracker on iPhone (web version only, 620px wide or less) ================= */
 #ibPhone{display:none}
 html.ibphone,html.ibphone body{height:100%;overflow:hidden;background:var(--bg)}
@@ -10584,6 +10584,74 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
     try { var tk = LS("ibtGTok"); if (tk && tk.token && tk.exp > Date.now() + 60000) webTok = tk; } catch (e) {}
     setInterval(function () { if (webTok && webTok.token) LS("ibtGTok", webTok); }, 2000);
 
+    // ---------- reconnect to Google on the next tap (iPhone-safe) ----------
+    // Google's web pass lasts about an hour. When it has run out, the next tap anywhere asks Google
+    // for a new one INSIDE that tap: iPhone Safari only allows the Google window from a "click"
+    // (finger lifted), and only if it's opened right away, not after waiting for something.
+    // So the Google script and token client are got ready in advance, the expiry is checked
+    // directly on every tap, and the tap still does its normal job. A Google window that never
+    // answers (Home Screen apps sometimes do this) is given up on after 20 s, so the next tap retries.
+    var gsi = { client: null, cid: "", mode: "", until: 0, timer: null };
+    var RECONNECT_TIMEOUT = window.__ibReconnTimeout || 20000;
+    function tokenValid() { return !!(webTok && webTok.token && webTok.exp - 60000 > Date.now()); }
+    function gsiPrepare() {
+      if (cloudMode !== "web") return;
+      var cid = cloud.clientId || BAKED_CLIENT_ID; if (!cid) return;
+      webLoadGsi().then(function () {
+        if (gsi.client && gsi.cid === cid) return;
+        gsi.cid = cid;
+        gsi.client = window.google.accounts.oauth2.initTokenClient({ client_id: cid, scope: GOOGLE_SCOPE, callback: gsiDone, error_callback: gsiFail });
+      }).catch(function () { /* offline: try again later */ });
+    }
+    function gsiBusy() { return gsi.until > Date.now(); }
+    function gsiEnd() { clearTimeout(gsi.timer); gsi.until = 0; var m = gsi.mode; gsi.mode = ""; return m; }
+    // must be called synchronously inside a click handler
+    function gsiRequest(mode) {
+      if (gsiBusy()) return true;
+      if (!gsi.client) { gsiPrepare(); return false; }
+      gsi.mode = mode; gsi.until = Date.now() + RECONNECT_TIMEOUT;
+      clearTimeout(gsi.timer);
+      gsi.timer = setTimeout(function () { if (gsi.mode) { gsiEnd(); if (mode === "signin") { cloudSigningIn = false; } cloud.needsSignIn = cloud.linked; phChip(); phRender(); } }, RECONNECT_TIMEOUT);
+      try { gsi.client.requestAccessToken({ prompt: "" }); return true; }
+      catch (x) { gsiEnd(); return false; }
+    }
+    function gsiDone(resp) {
+      var mode = gsiEnd();
+      if (!resp || resp.error) { gsiFail(); return; }
+      var gas = window.google.accounts.oauth2;
+      if (gas.hasGrantedAllScopes && !gas.hasGrantedAllScopes(resp, "https://www.googleapis.com/auth/drive.appdata")) {
+        cloud.needsSignIn = cloud.linked; cloudHandleError(cloudErr("missing_scope", "")); phRender(); return;
+      }
+      webTok = { token: resp.access_token, exp: Date.now() + (Number(resp.expires_in) || 3600) * 1000 };
+      LS("ibtGTok", webTok);
+      if (mode === "signin") { phSignInAfterToken(); return; }
+      cloud.needsSignIn = false; cloudMsg = ""; cloudMsgError = false; saveCloudPrefs();
+      phChip();
+      cloudSync(false).then(function () { phChip(); if (ui.tab === "settings") phRender(); });   // full sync straight after reconnecting
+    }
+    function gsiFail() {
+      var mode = gsiEnd();
+      if (mode === "signin") { cloudSigningIn = false; setCloudMsg("Sign-in was cancelled or blocked. Tap Sign in with Google again.", true); }
+      else if (cloud.linked) cloud.needsSignIn = true;   // the chip stays as a backup
+      phChip(); phRender();
+    }
+    // every tap (capture phase, before the tap's own action, which still runs as normal)
+    document.addEventListener("click", function () {
+      if (cloudMode !== "web" || !cloud.linked || cloudConflict || tokenValid() || gsiBusy()) return;
+      if (navigator.onLine === false) return;
+      gsiRequest("reconnect");
+    }, true);
+    // coming back to the app: sync straight away while the pass is still valid
+    function onForeground() {
+      if (document.hidden || !cloud.linked || cloudConflict) return;
+      if (tokenValid()) { cloud.needsSignIn = false; cloudSync(false); }
+      else { cloud.needsSignIn = true; phChip(); }
+    }
+    document.addEventListener("visibilitychange", onForeground);
+    window.addEventListener("pageshow", function (e) { if (e.persisted) onForeground(); });
+    gsiPrepare();
+    setInterval(function () { if (!gsi.client) gsiPrepare(); if (cloud.linked && !tokenValid() && !cloud.needsSignIn) { cloud.needsSignIn = true; phChip(); } }, 30000);
+
     // ---------- re-render the phone whenever the app re-renders or syncs ----------
     var _render = render; render = function () { var r = _render.apply(this, arguments); phRender(); return r; };
     var _rc = renderCloud; renderCloud = function () { var r = _rc.apply(this, arguments); phChip(); if (ui.tab === "settings" && !root.contains(document.activeElement)) phRender(); return r; };
@@ -10615,6 +10683,7 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       if (!cloud.linked) return '<button class="ph-chip warn" data-ph="go-acct"><i></i>Not signed in</button>';
       if (cloudBusy) return '<span class="ph-chip"><i style="background:var(--accent)"></i>Syncing…</span>';
       if (!online()) return '<span class="ph-chip warn"><i></i>Offline' + (pending ? " · " + pending + " waiting" : "") + "</span>";
+      if (gsiBusy()) return '<span class="ph-chip"><i style="background:var(--accent)"></i>Reconnecting…</span>';
       if (cloud.needsSignIn) return '<button class="ph-chip warn" data-ph="reconnect"><i></i>Tap to reconnect' + (pending ? " · " + pending : "") + "</button>";
       return '<button class="ph-chip" data-ph="sync"><i></i>Synced ' + H(agoText(cloud.lastSync)) + "</button>";
     }
@@ -10816,7 +10885,8 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       }
       return '<div class="ph-acct"><div class="ph-av">' + H((cloud.email || "G").charAt(0).toUpperCase()) + "</div><div><b>" + H(cloud.email || "Your Google account") + "</b><small>Last synced " + H(fmtSyncTime(cloud.lastSync)) + (pending ? " · " + pending + " change" + (pending === 1 ? "" : "s") + " waiting" : "") + "</small></div></div>" +
         desc("Your tracker lives in a hidden folder in your own Google Drive. The phone and the Mac both read and write it, so either one can be asleep. Edits made offline sync later, and the newest edit of each item wins.") +
-        (cloudMsg ? '<p class="ph-note' + (cloudMsgError ? " warn" : "") + '">' + H(cloudMsg) + "</p>" : "") +
+        (cloud.needsSignIn ? '<p class="ph-note warn">Google\u2019s 1-hour pass ran out. Your next tap anywhere reconnects by itself. If Google\u2019s window was closed or blocked, use this button.</p>'
+          : cloudMsg ? '<p class="ph-note' + (cloudMsgError ? " warn" : "") + '">' + H(cloudMsg) + "</p>" : "") +
         '<button class="ph-btn p" data-ph="' + (cloud.needsSignIn ? "reconnect" : "sync") + '"' + (cloudBusy ? " disabled" : "") + ">" + (cloud.needsSignIn ? "Reconnect to Google" : cloudBusy ? "Syncing…" : "Sync now") + '</button><button class="ph-btn" data-ph="signout">Sign out</button>';
     }
     function remindBody() {
@@ -10872,7 +10942,7 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
     }
     function howBody() {
       return '<p style="font-weight:700;margin:2px 0 4px">1. Put it on your Home Screen</p>' + homeSteps() +
-        '<p style="font-weight:700;margin:10px 0 4px">2. Sign in</p>' + desc("Settings → Account & sync → Sign in with Google. Use the same account as your Mac. Google asks again about once an hour of use: tap “Tap to reconnect” at the top of Today.") +
+        '<p style="font-weight:700;margin:10px 0 4px">2. Sign in</p>' + desc("Settings → Account & sync → Sign in with Google. Use the same account as your Mac. Google\u2019s pass lasts about an hour; after that, your next tap anywhere reconnects by itself and syncs.") +
         '<p style="font-weight:700;margin:10px 0 4px">3. Turn on reminders</p>' + desc("Settings → Phone reminders → Turn on reminders → Allow → Send a test. Study-block starts, your daily reminder and tests the evening before.") +
         '<p style="font-weight:700;margin:10px 0 4px">4. Every day</p>' + desc("Today: see the block you’re in and what’s next, tick tasks and add new ones. Upcoming: tests and deadlines for 2 weeks, and your IA, EE and TOK. Week: your timetable, view only.") +
         '<p style="font-weight:700;margin:10px 0 4px">5. Offline</p>' + desc("Everything still opens without internet. Ticks and new tasks are saved on the phone and sync when you’re back online.");
@@ -10916,9 +10986,15 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
     }
     function phSignIn() {
       cloud.clientId = cloud.clientId || BAKED_CLIENT_ID; saveCloudPrefs();
+      if (tokenValid()) { cloudSigningIn = true; phRender(); phSignInAfterToken(); return; }
+      if (gsiRequest("signin")) { cloudSigningIn = true; cloudMsg = ""; cloudMsgError = false; phRender(); }
+      else setCloudMsg("Getting Google sign-in ready… tap Sign in with Google again in a second.", false);
+    }
+    function phSignInAfterToken() {
       var fresh = !!window.__ibFresh && !cloud.linked;
       cloudSigningIn = true; cloudMsg = ""; cloudMsgError = false; phRender();
-      Promise.resolve(webTransport.signIn()).then(function (r) {
+      fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + webTok.token } })
+        .then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (r) {
         cloud.email = (r && r.email) || cloud.email;
         return cloudLink();
       }).then(function () {
@@ -10941,7 +11017,7 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       if (a === "go-howto") { goTab("settings", "howto"); return; }
       if (a === "signin") { phSignIn(); return; }
       if (a === "sync") { cloudSync(true); phChip(); return; }
-      if (a === "reconnect") { cloudSyncClicked(); phChip(); return; }
+      if (a === "reconnect") { if (!gsiBusy() && !tokenValid()) gsiRequest("reconnect"); else if (tokenValid()) { cloud.needsSignIn = false; cloudSync(false); } phChip(); return; }
       if (a === "signout") { cloudSignOutClicked(); setTimeout(phRender, 50); return; }
       if (a === "use-cloud") { cloudResolve(true); return; }
       if (a === "use-phone") { cloudResolve(false); return; }
@@ -10977,7 +11053,7 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
     // live time left
     setInterval(function () { if (PHONE_Q.matches && ui.tab === "today" && !(root.contains(document.activeElement) && document.activeElement.tagName === "INPUT")) phRender(); else phChip(); }, 20000);
     if (location.hash === "#upcoming") ui.tab = "upcoming";
-    window.__ibPhone = { render: phRender, ui: ui, PR: PR, look: look, tab: goTab };
+    window.__ibPhone = { render: phRender, ui: ui, PR: PR, look: look, tab: goTab, sync: function () { return { needsSignIn: !!cloud.needsSignIn, lastSync: cloud.lastSync, busy: cloudBusy, msg: cloudMsg, tokenValid: tokenValid(), reconnecting: gsiBusy() }; } };
     homeIcon();
     applyFamily();
     setMode();
