@@ -1,0 +1,15 @@
+{
+  "name": "IB Tracker",
+  "short_name": "IB Tracker",
+  "description": "Your IB timetable, tasks, tests and coursework, synced with the Mac app.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAF9F5",
+  "theme_color": "#FAF9F5",
+  "icons": [
+    { "src": "/icons/claude-light-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/claude-light-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/claude-light-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
