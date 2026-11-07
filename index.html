@@ -1,8 +1,9 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/claude-light-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="IB Tracker"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#FAF9F5"><meta name="description" content="IB Tracker: your IB timetable, tasks, tests and coursework, on your phone."><script>window.__IBWEB_BUILT="2026-11-07T17:00:54Z";document.documentElement.classList.add("ibweb");if(matchMedia("(max-width: 620px)").matches)document.documentElement.classList.add("ibphone");</script><style id="ibPhoneCss">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/claude-light-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="IB Tracker"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#FAF9F5"><meta name="description" content="IB Tracker: your IB timetable, tasks, tests and coursework, on your phone."><script>window.__IBWEB_BUILT="2026-11-07T17:24:24Z";document.documentElement.classList.add("ibweb");if(matchMedia("(max-width: 620px)").matches)document.documentElement.classList.add("ibphone");</script><style id="ibPhoneCss">
 /* ================= IB Tracker on iPhone (web version only, 620px wide or less) ================= */
 #ibPhone{display:none}
 html.ibphone,html.ibphone body{height:100%;overflow:hidden;background:var(--bg)}
-html.ibphone body>*:not(#ibPhone):not(#toasts):not(script):not(style){display:none!important}
+html.ibphone:not(.ibfull) body>*:not(#ibPhone):not(#toasts):not(script):not(style){display:none!important}
+html.ibphone.ibfull body>#phFullBar~*{}
 html.ibphone #ibPhone{display:flex;flex-direction:column;position:fixed;inset:0;background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 #ibPhone *{box-sizing:border-box}
 #ibPhone button{font:inherit;color:inherit;cursor:pointer}
@@ -123,6 +124,54 @@ html.ibphone #ibPhone{display:flex;flex-direction:column;position:fixed;inset:0;
 html.ibphone #toasts{bottom:calc(env(safe-area-inset-bottom,0px) + 74px)!important}
 /* web version (any width): Mac-only features hidden */
 html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appCard,html.ibweb #gcalCard,html.ibweb #cloudClientCard{display:none!important}
+/* ---- editing sheets ---- */
+#phSheet{display:none}
+#phSheet.open{display:block}
+.ph-dim{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:40;animation:phFade .15s ease-out}
+@keyframes phFade{from{opacity:0}to{opacity:1}}
+.ph-sheet{position:fixed;left:0;right:0;bottom:0;max-height:86vh;overflow-y:auto;background:var(--card);border-radius:22px 22px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.25);padding:10px 18px calc(env(safe-area-inset-bottom,0px) + 18px);z-index:41;-webkit-overflow-scrolling:touch}
+.ph-grab{width:40px;height:5px;border-radius:9px;background:var(--text-faint);margin:0 auto 12px}
+.ph-sheet h3{font-family:var(--font-display);font-style:var(--display-italic,normal);font-weight:500;font-size:21px;margin:0 0 12px}
+.ph-fld{margin-bottom:11px;min-width:0}
+.ph-fld label{display:block;font-size:11.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.ph-row{display:flex;gap:8px;align-items:stretch}.ph-row>*{flex:1;min-width:0}
+.ph-row .ph-btn{margin:4px 0 0}
+.ph-btn.del{color:var(--warn)}
+.ph-chips{display:flex;gap:6px;flex-wrap:wrap}
+.ph-chips button{padding:6px 10px;border-radius:99px;background:var(--card-2);font-size:13px;border:0;color:var(--text)}
+.ph-chips button.on{background:var(--accent);color:var(--accent-text)}
+.ph-subrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);font-size:14.5px}
+.ph-subrow:first-of-type{border-top:none}
+.ph-subrow span{flex:1;min-width:0}.ph-subrow span.dn{color:var(--text-faint);text-decoration:line-through}
+.ph-cbx{width:24px;height:24px;border-radius:7px;border:2px solid var(--text-faint);background:none;flex:none;display:grid;place-items:center;font-size:13px;color:var(--accent-text);padding:0}
+.ph-cbx.on{background:var(--good);border-color:var(--good)}
+.ph-x{border:0;background:none;color:var(--text-faint);font-size:20px;padding:0 4px}
+.ph-date{width:auto;flex:none;padding:6px 8px;font-size:14px}
+.ph-fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);width:54px;height:54px;border-radius:50%;background:var(--accent);color:var(--accent-text);border:0;font-size:28px;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:5}
+.ph-ev.sel{outline:3px solid var(--accent);outline-offset:1px;z-index:3;overflow:visible}
+.ph-ev[data-ph]{cursor:pointer}
+.ph-hdl{position:absolute;left:50%;width:44px;height:22px;transform:translateX(-50%);touch-action:none;z-index:4}
+.ph-hdl:after{content:"";position:absolute;left:8px;right:8px;top:8px;height:6px;border-radius:9px;background:var(--accent)}
+.ph-hdl.t{top:-12px}.ph-hdl.b{bottom:-12px}
+.ph-up[data-ph],.ph-cw[data-ph]{cursor:pointer}
+.ph-li{display:flex;align-items:center;gap:12px;padding:12px 0;border:0;border-top:1px solid var(--border);background:none;width:100%;text-align:left;font-size:15.5px}
+.ph-li:first-child{border-top:none}.ph-li .i{font-size:20px;width:26px;text-align:center}.ph-li b{display:block;font-weight:600}.ph-li small{display:block;color:var(--text-dim);font-size:12.5px}
+.ph-li .cv{margin-left:auto;color:var(--text-faint);font-size:20px}
+/* ---- "More": the full app inside the phone ---- */
+#phFullBar{display:none}
+html.ibphone.ibfull,html.ibphone.ibfull body{height:auto;overflow:visible}
+html.ibphone.ibfull body{padding-top:calc(env(safe-area-inset-top,0px) + 50px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 80px)}
+html.ibphone.ibfull #ibPhone{inset:auto 0 0 0;background:none}
+html.ibphone.ibfull #phScr{display:none}
+html.ibphone.ibfull #phFullBar{display:flex;position:fixed;top:0;left:0;right:0;z-index:30;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;background:var(--card);border-bottom:1px solid var(--border)}
+#phFullBar button{border:0;background:none;color:var(--accent);font:inherit;font-size:16px;font-weight:600;padding:4px 2px}
+#phFullBar b{font-size:16px;flex:1;text-align:center;margin-right:56px}
+html.ibphone.ibfull .masthead,html.ibphone.ibfull .tab-nav,html.ibphone.ibfull #settingsBack,html.ibphone.ibfull #onboard{display:none!important}
+html.ibphone.ibfull .wrap{padding-left:14px!important;padding-right:14px!important;max-width:100%!important;overflow-x:hidden}
+html.ibphone.ibfull .tab-panel{overflow-x:auto}
+.ph-hint{font-size:12.5px;color:var(--text-dim);margin:0 0 8px}
+html.ibphone.ibfull .pt-grid{grid-template-columns:minmax(0,1fr)!important}html.ibphone.ibfull .pt-grid>*{min-width:0}
+html.ibphone.ibfull .pt-task-row{flex-wrap:wrap;row-gap:6px}html.ibphone.ibfull .pt-task-row>*{min-width:0}
 </style></head><body>
 <title>IB Tracker</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMxMjE1MWIiIHN0cm9rZT0iI2QzYTI0YyIgc3Ryb2tlLXdpZHRoPSIxLjYiLz4KICA8ZyBzdHJva2U9IiMxMjE1MWIiIHN0cm9rZS13aWR0aD0iMC41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICA8cG9seWdvbiBwb2ludHM9IjIyLjAwLDE2LjAwIDIwLjI0LDIwLjI0IDI4LjUwLDE5LjU4IiBmaWxsPSIjZThjMjdhIi8+CiAgPHBvbHlnb24gcG9pbnRzPSIyMC4yNCwyMC4yNCAxNi4wMCwyMi4wMCAyMi4zMCwyNy4zNyIgZmlsbD0iI2U4YzI3YSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTYuMDAsMjIuMDAgMTEuNzYsMjAuMjQgMTIuNDIsMjguNTAiIGZpbGw9IiNlOGMyN2EiLz4KICA8cG9seWdvbiBwb2ludHM9IjExLjc2LDIwLjI0IDEwLjAwLDE2LjAwIDQuNjMsMjIuMzAiIGZpbGw9IiNlOGMyN2EiLz4KICA8cG9seWdvbiBwb2ludHM9IjEwLjAwLDE2LjAwIDExLjc2LDExLjc2IDMuNTAsMTIuNDIiIGZpbGw9IiNlOGMyN2EiLz4KICA8cG9seWdvbiBwb2ludHM9IjExLjc2LDExLjc2IDE2LjAwLDEwLjAwIDkuNzAsNC42MyIgZmlsbD0iI2U4YzI3YSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTYuMDAsMTAuMDAgMjAuMjQsMTEuNzYgMTkuNTgsMy41MCIgZmlsbD0iI2U4YzI3YSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMjAuMjQsMTEuNzYgMjIuMDAsMTYuMDAgMjcuMzcsOS43MCIgZmlsbD0iI2U4YzI3YSIvPgogIDwvZz4KPC9zdmc+">
@@ -10611,7 +10660,7 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       if (!gsi.client) { gsiPrepare(); return false; }
       gsi.mode = mode; gsi.until = Date.now() + RECONNECT_TIMEOUT;
       clearTimeout(gsi.timer);
-      gsi.timer = setTimeout(function () { if (gsi.mode) { gsiEnd(); if (mode === "signin") { cloudSigningIn = false; } cloud.needsSignIn = cloud.linked; phChip(); phRender(); } }, RECONNECT_TIMEOUT);
+      gsi.timer = setTimeout(function () { if (gsi.mode) { if (gsi.mode === "reconnect") gsiFails++; gsiEnd(); if (mode === "signin") { cloudSigningIn = false; } cloud.needsSignIn = cloud.linked; phChip(); phRender(); } }, RECONNECT_TIMEOUT);
       try { gsi.client.requestAccessToken({ prompt: "" }); return true; }
       catch (x) { gsiEnd(); return false; }
     }
@@ -10623,6 +10672,7 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
         cloud.needsSignIn = cloud.linked; cloudHandleError(cloudErr("missing_scope", "")); phRender(); return;
       }
       webTok = { token: resp.access_token, exp: Date.now() + (Number(resp.expires_in) || 3600) * 1000 };
+      gsiFails = 0;
       LS("ibtGTok", webTok);
       if (mode === "signin") { phSignInAfterToken(); return; }
       cloud.needsSignIn = false; cloudMsg = ""; cloudMsgError = false; saveCloudPrefs();
@@ -10631,14 +10681,18 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
     }
     function gsiFail() {
       var mode = gsiEnd();
+      if (mode === "reconnect") gsiFails++;
       if (mode === "signin") { cloudSigningIn = false; setCloudMsg("Sign-in was cancelled or blocked. Tap Sign in with Google again.", true); }
       else if (cloud.linked) cloud.needsSignIn = true;   // the chip stays as a backup
       phChip(); phRender();
     }
     // every tap (capture phase, before the tap's own action, which still runs as normal)
-    document.addEventListener("click", function () {
+    var gsiFails = 0;   // after 2 failed tries in a row, only the chip / Settings button reconnects
+    document.addEventListener("click", function (e) {
       if (cloudMode !== "web" || !cloud.linked || cloudConflict || tokenValid() || gsiBusy()) return;
-      if (navigator.onLine === false) return;
+      if (navigator.onLine === false || gsiFails >= 2) return;
+      var t = e.target;
+      if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"], label')) return;   // don't push the keyboard away
       gsiRequest("reconnect");
     }, true);
     // coming back to the app: sync straight away while the pass is still valid
@@ -10693,13 +10747,13 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       if (s < 60) return "just now"; if (s < 3600) return Math.round(s / 60) + " min ago";
       return fmtSyncTime(iso);
     }
-    function phChip() { var c = root.querySelector("[data-chip]"); if (c) c.innerHTML = chipHTML(); }
+    function phChip() { var c = root.querySelector("[data-syncchip]"); if (c) c.innerHTML = chipHTML(); }
     function sw(on, act, extra) { return '<button class="ph-sw' + (on ? " on" : "") + '" role="switch" aria-checked="' + (on ? "true" : "false") + '" data-ph="' + act + '"' + (extra || "") + "></button>"; }
 
     // ---------- Today ----------
     function todayHTML() {
       var n = new Date(), today = startOfDay(n), nm = nowMin();
-      var h = '<div class="ph-hd"><h1>Today</h1><span data-chip>' + chipHTML() + "</span></div>" +
+      var h = '<div class="ph-hd"><h1>Today</h1><span data-syncchip>' + chipHTML() + "</span></div>" +
         '<p class="ph-sub">' + H(n.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })) + "</p>";
       if (!cloud.linked && window.__ibFresh) return h + welcomeHTML();
       var items = dayItems(today).filter(function (x) { return !x.done; });
@@ -10744,16 +10798,16 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       var today = startOfDay(new Date()), tIso = isoDay(today), end = new Date(today.getTime()); end.setDate(end.getDate() + 14);
       var eIso = isoDay(end), tm = new Date(today.getTime()); tm.setDate(tm.getDate() + 1); var tmIso = isoDay(tm);
       var list = [];
-      (state.milestones || []).forEach(function (m) { if (m && m.date >= tIso && m.date <= eIso) list.push({ date: m.date, title: subjIcon(m.subject) + " " + m.label, kind: "Test" }); });
-      (state.prepTasks || []).forEach(function (p) { if (p && p.date && !p.cwId && p.date <= eIso && ptProgressOf(p) < 100) list.push({ date: p.date, title: "📌 " + p.name, kind: p.date < tIso ? "Overdue" : "Task" + ((p.subtasks || []).length ? " · " + p.subtasks.filter(function (x) { return x.done; }).length + "/" + p.subtasks.length : "") }); });
-      if (feat("coursework")) (state.coursework || []).forEach(function (c) { (c.stages || []).forEach(function (st) { if (st && st.due && !st.done && st.due <= eIso) list.push({ date: st.due, title: "📚 " + (c.title || "Coursework") + " — " + (st.name || "stage"), kind: st.due < tIso ? "Overdue" : "Coursework" }); }); });
+      (state.milestones || []).forEach(function (m) { if (m && m.date >= tIso && m.date <= eIso) list.push({ date: m.date, title: subjIcon(m.subject) + " " + m.label, kind: "Test", ed: "m:" + m.id }); });
+      (state.prepTasks || []).forEach(function (p) { if (p && p.date && !p.cwId && p.date <= eIso && ptProgressOf(p) < 100) list.push({ ed: "p:" + p.id, date: p.date, title: "📌 " + p.name, kind: p.date < tIso ? "Overdue" : "Task" + ((p.subtasks || []).length ? " · " + p.subtasks.filter(function (x) { return x.done; }).length + "/" + p.subtasks.length : "") }); });
+      if (feat("coursework")) (state.coursework || []).forEach(function (c) { (c.stages || []).forEach(function (st) { if (st && st.due && !st.done && st.due <= eIso) list.push({ ed: "c:" + c.id, date: st.due, title: "📚 " + (c.title || "Coursework") + " — " + (st.name || "stage"), kind: st.due < tIso ? "Overdue" : "Coursework" }); }); });
       list.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
       var cfg = remindCfg(), on = PR.on && cfg.tests;
       var h = '<div class="ph-hd"><h1>Upcoming</h1><span class="ph-chip">Next 2 weeks</span></div><div class="ph-card" style="margin-top:10px">';
       h += list.length ? list.map(function (x) {
         var d = new Date(x.date + "T00:00:00"), days = Math.round((d - today) / 86400000);
         var when = days < 0 ? Math.abs(days) + (Math.abs(days) === 1 ? " day" : " days") + " overdue" : days === 0 ? "Today" : days === 1 ? "Tomorrow" : "In " + days + " days";
-        return '<div class="ph-up"><div class="ph-dt' + (days <= 1 ? " hot" : "") + '">' + DSHORT[d.getDay()] + "<b>" + d.getDate() + '</b></div><div class="w"><b>' + H(x.title) + "</b><small>" + when + " · " + H(x.kind) + "</small>" +
+        return '<div class="ph-up" data-ph="ed" data-ed="' + H(x.ed || "") + '"><div class="ph-dt' + (days <= 1 ? " hot" : "") + '">' + DSHORT[d.getDay()] + "<b>" + d.getDate() + '</b></div><div class="w"><b>' + H(x.title) + "</b><small>" + when + " · " + H(x.kind) + "</small>" +
           (on && x.date === tmIso ? '<span class="ph-bell">🔔 Reminder tonight ' + H(cfg.evening) + "</span>" : "") + "</div></div>";
       }).join("") : '<p class="ph-empty">Nothing due in the next two weeks. 🎉</p>';
       h += "</div>";
@@ -10762,38 +10816,39 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
         h += '<div class="ph-lbl">Coursework</div><div class="ph-card">' + cw.map(function (c) {
           var st = c.stages || [], dn = st.filter(function (x) { return x.done; }).length, nx = st.filter(function (x) { return !x.done; })[0];
           var pct = st.length ? Math.round(dn / st.length * 100) : 0;
-          return '<div class="ph-cw"><div class="h">' + subjIcon(c.subject || (c.kind && c.kind.indexOf("tok") === 0 ? "tok" : "")) + " " + H(c.title || "Coursework") + "<span>" + (st.length && !nx ? "Done ✓" : H(nx ? nx.name : "Not started")) + '</span></div><div class="ph-pb"><i style="width:' + Math.max(3, pct) + '%"></i></div>' +
+          return '<div class="ph-cw" data-ph="ed" data-ed="c:' + H(c.id) + '"><div class="h">' + subjIcon(c.subject || (c.kind && c.kind.indexOf("tok") === 0 ? "tok" : "")) + " " + H(c.title || "Coursework") + "<span>" + (st.length && !nx ? "Done ✓" : H(nx ? nx.name : "Not started")) + '</span></div><div class="ph-pb"><i style="width:' + Math.max(3, pct) + '%"></i></div>' +
             "<small>" + dn + " of " + st.length + " stages" + (nx && nx.due ? " · next due " + H(ptFmtDate(nx.due)) : "") + (c.wordLimit ? " · " + (c.words || 0) + "/" + c.wordLimit + " words" : "") + "</small></div>";
         }).join("") + "</div>";
       }
-      return h;
+      return h + '<button class="ph-fab" data-ph="fab-add" aria-label="Add">＋</button>';
     }
 
-    // ---------- Week (view only) ----------
+    // ---------- Week ----------
     function weekHTML() {
       var today = startOfDay(new Date()), mon = mondayOf(today);
       if (!ui.weekDay) ui.weekDay = isoDay(today);
       var sel = new Date(ui.weekDay + "T00:00:00");
-      var h = '<div class="ph-hd"><h1>This week</h1><span class="ph-chip">View only</span></div><div class="ph-days" style="margin-top:12px">';
+      var h = '<div class="ph-hd"><h1>This week</h1><span class="ph-chip">Tap a block to edit</span></div><div class="ph-days" style="margin-top:12px">';
       for (var i = 0; i < 7; i++) {
         var d = new Date(mon.getTime()); d.setDate(d.getDate() + i); var iso = isoDay(d);
         h += '<button data-ph="day" data-iso="' + iso + '" class="' + (iso === ui.weekDay ? "on " : "") + (iso === isoDay(today) ? "today" : "") + '">' + DSHORT[d.getDay()] + "<b>" + d.getDate() + "</b></button>";
       }
       h += "</div>";
       var items = dayItems(sel);
-      if (!items.length) return h + '<div class="ph-card"><p class="ph-empty">No classes or study blocks on this day.</p></div><p class="ph-ro">Plan your days on the Mac. Changes show up here after it syncs.</p>';
+      if (!items.length) return h + '<div class="ph-card"><p class="ph-empty">No classes or study blocks on this day. Tap ＋ to add one.</p></div>' + '<button class="ph-fab" data-ph="fab-blk" aria-label="Add a study block">＋</button>';
       var s = Math.floor(Math.min.apply(null, items.map(function (x) { return x.start; })) / 60) * 60;
       var e = Math.ceil(Math.max.apply(null, items.map(function (x) { return x.end; })) / 60) * 60;
-      var PX = 1.5, hgt = (e - s) * PX;
+      var PX = WEEK_PX, hgt = (e - s) * PX;
       h += '<div class="ph-tl" style="height:' + (hgt + 8) + 'px">';
       for (var m = s; m <= e; m += 60) h += '<div class="ph-hr" style="top:' + ((m - s) * PX) + 'px">' + hm(m) + "</div>";
       items.forEach(function (x) {
         var col = subjColor(x.subject);
-        h += '<div class="ph-ev ' + (x.kind === "block" ? "blk" : "cls") + (x.done ? " done" : "") + '" style="--sc:' + col + ";top:" + ((x.start - s) * PX + 2) + "px;height:" + Math.max(24, (x.end - x.start) * PX - 4) + 'px">' + subjIcon(x.subject) + " " + H(x.title) +
-          ((x.end - x.start) * PX > 38 ? "<small>" + (x.kind === "block" ? "Study block" : "Class") + " · " + hm(x.start) + "–" + hm(x.end) + "</small>" : "") + "</div>";
+        var selB = x.kind === "block" && ui.selBlock === x.id;
+        h += '<div class="ph-ev ' + (x.kind === "block" ? "blk" : "cls") + (x.done ? " done" : "") + (selB ? " sel" : "") + '" data-ph="' + (x.kind === "block" ? "blk" : "cls") + '" data-id="' + H(x.id || "") + '" style="--sc:' + col + ";top:" + ((x.start - s) * PX + 2) + "px;height:" + Math.max(24, (x.end - x.start) * PX - 4) + 'px">' + subjIcon(x.subject) + " " + H(x.title) +
+          ((x.end - x.start) * PX > 38 ? "<small>" + (x.kind === "block" ? "Study block" : "Class") + " · " + hm(x.start) + "–" + hm(x.end) + "</small>" : "") + (selB ? '<span class="ph-hdl t" aria-label="Drag to move"></span><span class="ph-hdl b" aria-label="Drag to change length"></span>' : "") + "</div>";
       });
       if (ui.weekDay === isoDay(today)) { var nm = nowMin(); if (nm >= s && nm <= e) h += '<div class="ph-nowl" style="top:' + ((nm - s) * PX) + 'px"></div>'; }
-      return h + '</div><p class="ph-ro">Plan your days on the Mac. Changes show up here after it syncs.</p>';
+      return h + '</div><p class="ph-ro">Classes come from your timetable (More → Full settings).</p>' + '<button class="ph-fab" data-ph="fab-blk" aria-label="Add a study block">＋</button>';
     }
 
     // ---------- Phone reminders (Web Push through the reminder server) ----------
@@ -10944,7 +10999,7 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       return '<p style="font-weight:700;margin:2px 0 4px">1. Put it on your Home Screen</p>' + homeSteps() +
         '<p style="font-weight:700;margin:10px 0 4px">2. Sign in</p>' + desc("Settings → Account & sync → Sign in with Google. Use the same account as your Mac. Google\u2019s pass lasts about an hour; after that, your next tap anywhere reconnects by itself and syncs.") +
         '<p style="font-weight:700;margin:10px 0 4px">3. Turn on reminders</p>' + desc("Settings → Phone reminders → Turn on reminders → Allow → Send a test. Study-block starts, your daily reminder and tests the evening before.") +
-        '<p style="font-weight:700;margin:10px 0 4px">4. Every day</p>' + desc("Today: see the block you’re in and what’s next, tick tasks and add new ones. Upcoming: tests and deadlines for 2 weeks, and your IA, EE and TOK. Week: your timetable, view only.") +
+        '<p style="font-weight:700;margin:10px 0 4px">4. Every day</p>' + desc("Today: see the block you’re in and what’s next, tick tasks and add new ones. Upcoming: tests and deadlines for 2 weeks, and your IA, EE and TOK. Week: tap a block to change it, drag its handles, or ＋ to add one. Upcoming: ＋ to add tests, tasks and coursework stages; tap anything to edit it. More: every other screen from the Mac app.") +
         '<p style="font-weight:700;margin:10px 0 4px">5. Offline</p>' + desc("Everything still opens without internet. Ticks and new tasks are saved on the phone and sync when you’re back online.");
     }
     function aboutBody() {
@@ -10965,20 +11020,252 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
         sec("about", "ℹ️", "About", "Phone 1.0", aboutBody);
     }
 
+    var WEEK_PX = 1.5;
+
+    // ================= editing on the phone (Week, Upcoming, Coursework) + "More" (full app) =================
+    var sheetEl = document.createElement("div"); sheetEl.id = "phSheet"; root.appendChild(sheetEl);
+    var sheet = null;   // { kind, ... } while a sheet is open
+    function subjChips(sel, name) {
+      return '<div class="ph-chips" data-chips="' + name + '">' + allSubjKeys().concat(["general"]).map(function (k) {
+        return '<button type="button" data-chip="' + H(k) + '" class="' + (k === sel ? "on" : "") + '">' + H(subjIcon(k) + " " + (k === "general" ? "Other" : subjLabel(k))) + "</button>";
+      }).join("") + "</div>";
+    }
+    function openSheet(o, html) {
+      sheet = o;
+      sheetEl.innerHTML = '<div class="ph-dim" data-sh="close"></div><div class="ph-sheet ph-pop"><div class="ph-grab"></div>' + html + "</div>";
+      sheetEl.classList.add("open");
+    }
+    function closeSheet() { sheet = null; sheetEl.classList.remove("open"); sheetEl.innerHTML = ""; phRender(); }
+    function val(n) { var el = sheetEl.querySelector('[name="' + n + '"]'); return el ? el.value : ""; }
+    function chipVal(n) { var el = sheetEl.querySelector('[data-chips="' + n + '"] .on'); return el ? el.getAttribute("data-chip") : ""; }
+    function changed() { bump(); render(); scheduleSave(); pushRefresh(false); }
+    function toMin(t) { var m = /^(\d{1,2}):(\d{2})$/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : null; }
+    function hh(m) { return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
+    function lenSelect(cur) {
+      var o = ""; [15, 20, 25, 30, 40, 45, 50, 60, 75, 90, 120, 150, 180].forEach(function (m) { o += '<option value="' + m + '"' + (m === cur ? " selected" : "") + ">" + (m < 60 ? m + " min" : (m / 60) + (m % 60 ? "" : "") + " h" + (m % 60 ? " " + (m % 60) + " min" : "")) + "</option>"; });
+      if ([15, 20, 25, 30, 40, 45, 50, 60, 75, 90, 120, 150, 180].indexOf(cur) < 0) o = '<option value="' + cur + '" selected>' + cur + " min</option>" + o;
+      return '<select class="ph-in" name="dur">' + o + "</select>";
+    }
+    function weekDays() { var mon = mondayOf(startOfDay(new Date())), out = []; for (var i = 0; i < 14; i++) { var d = new Date(mon.getTime()); d.setDate(d.getDate() + i); out.push(d); } return out; }
+    function daySelect(iso) {
+      return '<select class="ph-in" name="day">' + weekDays().map(function (d) { var i = isoDay(d); return '<option value="' + i + '"' + (i === iso ? " selected" : "") + ">" + H(d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })) + "</option>"; }).join("") + "</select>";
+    }
+    function findBlock(iso, id) { return calBlocks(iso).filter(function (b) { return b.id === id; })[0] || null; }
+
+    // ---- Week: study blocks ----
+    function blockSheet(iso, id) {
+      var b = findBlock(iso, id); if (!b) return;
+      var d = new Date(iso + "T00:00:00"), done = blockDone(b, d);
+      ui.selBlock = id; phRender();
+      openSheet({ kind: "block", iso: iso, id: id }, "<h3>" + H(subjIcon(b.subject) + " " + (b.title || "Study block")) + "</h3>" +
+        '<div class="ph-fld"><label>Name</label><input class="ph-in" name="title" maxlength="80" value="' + H(b.title || "") + '"></div>' +
+        '<div class="ph-row"><div class="ph-fld"><label>Start</label><input class="ph-in" type="time" step="300" name="start" value="' + hh(b.start) + '"></div><div class="ph-fld"><label>Length</label>' + lenSelect(b.dur || 30) + "</div></div>" +
+        '<div class="ph-fld"><label>Day</label>' + daySelect(iso) + "</div>" +
+        '<div class="ph-fld"><label>Subject</label>' + subjChips(b.subject || "general", "subj") + "</div>" +
+        '<p class="ph-hint">Tip: tap outside this panel, then drag the block\u2019s handles to move it or change its length.</p>' +
+        '<div class="ph-row"><button class="ph-btn p" data-sh="blk-done">' + (done ? "↺ Not done" : "✓ Done") + '</button><button class="ph-btn" data-sh="blk-save">Save</button><button class="ph-btn del" data-sh="blk-del">Delete</button></div>');
+    }
+    function newBlockSheet(iso) {
+      var dur = 45, start = nextFreeStart(iso, dur);
+      openSheet({ kind: "newblock", iso: iso }, "<h3>New study block</h3>" +
+        '<div class="ph-fld"><label>Name</label><input class="ph-in" name="title" maxlength="80" placeholder="e.g. Physics past paper"></div>' +
+        '<div class="ph-row"><div class="ph-fld"><label>Start</label><input class="ph-in" type="time" step="300" name="start" value="' + hh(start) + '"></div><div class="ph-fld"><label>Length</label>' + lenSelect(dur) + "</div></div>" +
+        '<div class="ph-fld"><label>Day</label>' + daySelect(iso) + "</div>" +
+        '<div class="ph-fld"><label>Subject</label>' + subjChips(allSubjKeys()[0] || "general", "subj") + "</div>" +
+        '<div class="ph-row"><button class="ph-btn" data-sh="close">Cancel</button><button class="ph-btn p" data-sh="blk-add">Add</button></div>');
+    }
+    function blockFromSheet(b) {
+      var st = toMin(val("start")); if (st != null) b.start = Math.max(0, Math.min(24 * 60 - 5, st));
+      b.dur = Math.max(5, Number(val("dur")) || b.dur || 30);
+      var t = val("title").trim(); if (t) b.title = t;
+      var s = chipVal("subj"); if (s) b.subject = s;
+      return val("day");
+    }
+    function moveBlock(fromIso, b, toIso) {
+      calSetBlocks(fromIso, calBlocks(fromIso).filter(function (x) { return x.id !== b.id; }));
+      calBlocksMut(toIso).push(b);
+    }
+
+    // drag the handles of the selected block: top = move, bottom = length (5-minute steps)
+    var drag = null;
+    root.addEventListener("pointerdown", function (e) {
+      var hd = e.target.closest(".ph-hdl"); if (!hd) return;
+      var ev = hd.closest(".ph-ev"); var iso = ui.weekDay, b = findBlock(iso, ev.getAttribute("data-id")); if (!b) return;
+      e.preventDefault(); hd.setPointerCapture && hd.setPointerCapture(e.pointerId);
+      drag = { el: ev, b: b, iso: iso, top: hd.classList.contains("t"), y0: e.clientY, top0: parseFloat(ev.style.top), h0: parseFloat(ev.style.height), start0: b.start, dur0: b.dur || 30 };
+    });
+    root.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var dm = Math.round((e.clientY - drag.y0) / WEEK_PX / 5) * 5;
+      if (drag.top) { drag.ns = Math.max(0, Math.min(24 * 60 - drag.dur0, drag.start0 + dm)); drag.el.style.top = (drag.top0 + (drag.ns - drag.start0) * WEEK_PX) + "px"; }
+      else { drag.nd = Math.max(5, drag.dur0 + dm); drag.el.style.height = Math.max(24, drag.h0 + (drag.nd - drag.dur0) * WEEK_PX) + "px"; }
+      var lab = drag.el.querySelector("small"); if (lab) lab.textContent = "Study block · " + hm(drag.ns != null ? drag.ns : drag.start0) + "–" + hm((drag.ns != null ? drag.ns : drag.start0) + (drag.nd != null ? drag.nd : drag.dur0));
+    });
+    function endDrag() {
+      if (!drag) return;
+      var d = drag; drag = null;
+      if (d.ns != null && d.ns !== d.start0) d.b.start = d.ns;
+      if (d.nd != null && d.nd !== d.dur0) d.b.dur = d.nd;
+      if (d.ns != null || d.nd != null) { changed(); if (sheet && sheet.kind === "block") blockSheet(d.iso, d.b.id); }
+    }
+    root.addEventListener("pointerup", endDrag); root.addEventListener("pointercancel", endDrag);
+
+    // ---- Upcoming: tests, tasks, coursework stages ----
+    function cwPieces() { return (state.coursework || []).filter(function (c) { return c.kind !== "cas"; }); }
+    function addSheet(type) {
+      type = type || (sheet && sheet.type) || "test";
+      var tm = new Date(); tm.setDate(tm.getDate() + 1);
+      var pieces = cwPieces();
+      openSheet({ kind: "add", type: type }, "<h3>Add to Upcoming</h3>" +
+        '<div class="ph-seg" style="margin-bottom:12px">' + [["test", "Test"], ["task", "Task"], ["stage", "Coursework stage"]].map(function (t) { return '<button type="button" data-sh="type" data-k="' + t[0] + '" class="' + (type === t[0] ? "on" : "") + '">' + t[1] + "</button>"; }).join("") + "</div>" +
+        (type === "stage" && !pieces.length ? '<p class="ph-note">Add an IA, EE or TOK piece first (More → Grades → Coursework).</p>' :
+        (type === "stage" ? '<div class="ph-fld"><label>Piece</label><select class="ph-in" name="piece">' + pieces.map(function (c) { return '<option value="' + H(c.id) + '">' + H(c.title || "Coursework") + "</option>"; }).join("") + "</select></div>" : "") +
+        '<div class="ph-fld"><label>' + (type === "stage" ? "Stage" : "Name") + '</label><input class="ph-in" name="name" maxlength="100" placeholder="' + (type === "test" ? "e.g. Math AA quiz · Sequences" : type === "task" ? "e.g. Finish lab write-up" : "e.g. First draft") + '"></div>' +
+        (type === "test" ? '<div class="ph-fld"><label>Subject</label>' + subjChips(allSubjKeys()[0] || "general", "subj") + "</div>" : "") +
+        '<div class="ph-fld"><label>' + (type === "task" ? "Due" : "Date") + '</label><input class="ph-in" type="date" name="date" value="' + isoDay(tm) + '"></div>' +
+        '<div class="ph-row"><button class="ph-btn" data-sh="close">Cancel</button><button class="ph-btn p" data-sh="add-save">Add</button></div>'));
+    }
+    function testSheet(id) {
+      var m = (state.milestones || []).filter(function (x) { return x.id === id; })[0]; if (!m) return;
+      openSheet({ kind: "test", id: id }, "<h3>Test</h3>" +
+        '<div class="ph-fld"><label>Name</label><input class="ph-in" name="name" maxlength="100" value="' + H(m.label) + '"></div>' +
+        '<div class="ph-fld"><label>Subject</label>' + subjChips(m.subject || "general", "subj") + "</div>" +
+        '<div class="ph-fld"><label>Date</label><input class="ph-in" type="date" name="date" value="' + H(m.date) + '"></div>' +
+        '<div class="ph-row"><button class="ph-btn del" data-sh="test-del">Delete</button><button class="ph-btn p" data-sh="test-save">Save</button></div>');
+    }
+    function taskSheet(id) {
+      var t = (state.prepTasks || []).filter(function (x) { return x.id === id; })[0]; if (!t) return;
+      var subs = t.subtasks || [];
+      openSheet({ kind: "task", id: id }, "<h3>Task</h3>" +
+        '<div class="ph-fld"><label>Name</label><input class="ph-in" name="name" maxlength="120" value="' + H(t.name) + '"></div>' +
+        '<div class="ph-row"><div class="ph-fld"><label>Due</label><input class="ph-in" type="date" name="date" value="' + H(t.date || "") + '"></div>' +
+        '<div class="ph-fld"><label>Importance</label><select class="ph-in" name="tier">' + [["urgent-important", "Urgent"], ["important", "Important"], ["chill", "Chill"]].map(function (x) { return '<option value="' + x[0] + '"' + (t.tier === x[0] ? " selected" : "") + ">" + x[1] + "</option>"; }).join("") + "</select></div></div>" +
+        '<div class="ph-fld"><label>Subtasks</label>' + subs.map(function (s) {
+          return '<div class="ph-subrow"><button type="button" class="ph-cbx' + (s.done ? " on" : "") + '" data-sh="sub-tick" data-k="' + H(s.id) + '">' + (s.done ? "✓" : "") + '</button><span class="' + (s.done ? "dn" : "") + '">' + H(s.text) + '</span><button type="button" class="ph-x" data-sh="sub-del" data-k="' + H(s.id) + '" aria-label="Delete">×</button></div>';
+        }).join("") + '<div class="ph-row" style="margin-top:6px"><input class="ph-in" name="newsub" maxlength="100" placeholder="Add a subtask"><button type="button" class="ph-btn" style="flex:0 0 auto;margin:0" data-sh="sub-add">＋</button></div></div>' +
+        '<div class="ph-row"><button class="ph-btn p" data-sh="task-done">' + (ptProgressOf(t) >= 100 ? "↺ Not done" : "✓ Done") + '</button><button class="ph-btn" data-sh="task-save">Save</button><button class="ph-btn del" data-sh="task-del">Delete</button></div>');
+    }
+    function cwSheet(id) {
+      var c = (state.coursework || []).filter(function (x) { return x.id === id; })[0]; if (!c) return;
+      openSheet({ kind: "cw", id: id }, "<h3>" + H(subjIcon(c.subject || "") + " " + (c.title || "Coursework")) + "</h3>" +
+        (c.stages || []).map(function (st, i) {
+          return '<div class="ph-subrow"><button type="button" class="ph-cbx' + (st.done ? " on" : "") + '" data-sh="st-tick" data-k="' + i + '">' + (st.done ? "✓" : "") + '</button><span class="' + (st.done ? "dn" : "") + '">' + H(st.name || "Stage") + '</span><input class="ph-in ph-date" type="date" name="due' + i + '" value="' + H(st.due || "") + '"></div>';
+        }).join("") +
+        '<div class="ph-row" style="margin-top:6px"><input class="ph-in" name="newstage" maxlength="80" placeholder="Add a stage"><button type="button" class="ph-btn" style="flex:0 0 auto;margin:0" data-sh="st-add">＋</button></div>' +
+        (c.wordLimit ? '<div class="ph-fld" style="margin-top:10px"><label>Words</label><div class="ph-row"><input class="ph-in" type="number" inputmode="numeric" name="words" value="' + (c.words || 0) + '"><span class="ph-in" style="color:var(--text-dim)">/ ' + c.wordLimit + "</span></div></div>" : "") +
+        '<button class="ph-btn p" style="width:100%;margin-top:10px" data-sh="cw-save">Done</button>');
+    }
+    function cwSaveFields(c) {
+      (c.stages || []).forEach(function (st, i) { var v = val("due" + i); if (v !== undefined && v !== st.due) st.due = v; });
+      if (c.wordLimit) { var w = parseInt(val("words"), 10); if (!isNaN(w)) c.words = Math.max(0, w); }
+    }
+
+    sheetEl.addEventListener("click", function (e) {
+      var ch = e.target.closest("[data-chip]");
+      if (ch) { ch.parentNode.querySelectorAll(".on").forEach(function (x) { x.classList.remove("on"); }); ch.classList.add("on"); return; }
+      var el = e.target.closest("[data-sh]"); if (!el || !sheet) return;
+      var a = el.getAttribute("data-sh"), s = sheet, k = el.getAttribute("data-k");
+      if (a === "close") { if (!(s.kind === "block" && el.classList.contains("ph-dim"))) ui.selBlock = null; closeSheet(); return; }
+      if (a === "type") { addSheet(k); return; }
+      // blocks
+      if (a === "blk-add") {
+        var nb = { id: calUid(), start: 16 * 60, dur: 45, title: "Study block", subject: "general" };
+        var to = blockFromSheet(nb); if (!val("title").trim()) nb.title = subjLabel(nb.subject) || "Study block";
+        calBlocksMut(to || s.iso).push(nb); ui.weekDay = to || s.iso; changed(); closeSheet(); return;
+      }
+      if (a === "blk-save" || a === "blk-done" || a === "blk-del") {
+        var b = findBlock(s.iso, s.id); if (!b) { closeSheet(); return; }
+        if (a === "blk-del") { calSetBlocks(s.iso, calBlocks(s.iso).filter(function (x) { return x.id !== b.id; })); }
+        else {
+          var toIso = blockFromSheet(b);
+          if (a === "blk-done") { var d = new Date(s.iso + "T00:00:00"), nd = !blockDone(b, d); if (b.ref) setRefDone(b.ref, d, nd); b.done = nd; }
+          if (toIso && toIso !== s.iso) { moveBlock(s.iso, b, toIso); ui.weekDay = toIso; }
+        }
+        ui.selBlock = null; changed(); closeSheet(); return;
+      }
+      // add to upcoming
+      if (a === "add-save") {
+        var name = val("name").trim(), date = val("date");
+        if (!name) { var ni = sheetEl.querySelector('[name="name"]'); ni && ni.focus(); return; }
+        if (s.type === "test") { state.milestones = state.milestones || []; state.milestones.push({ id: "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), subject: chipVal("subj") || "general", label: name, date: date }); }
+        else if (s.type === "task") { state.prepTasks = state.prepTasks || []; state.prepTasks.push({ id: ptUid(), name: name, tier: "important", date: date, done: false, open: false, subtasks: [], notes: "", createdAt: isoDay(new Date()) }); }
+        else { var pc = (state.coursework || []).filter(function (x) { return x.id === val("piece"); })[0]; if (pc) { pc.stages = pc.stages || []; pc.stages.push({ name: name, due: date, done: false }); if (typeof syncCourseworkTasks === "function") syncCourseworkTasks(); } }
+        changed(); closeSheet(); return;
+      }
+      // tests
+      if (a === "test-save" || a === "test-del") {
+        if (a === "test-del") state.milestones = (state.milestones || []).filter(function (x) { return x.id !== s.id; });
+        else { var m = (state.milestones || []).filter(function (x) { return x.id === s.id; })[0]; if (m) { m.label = val("name").trim() || m.label; m.date = val("date") || m.date; m.subject = chipVal("subj") || m.subject; } }
+        changed(); closeSheet(); return;
+      }
+      // tasks
+      var t = s.kind === "task" ? (state.prepTasks || []).filter(function (x) { return x.id === s.id; })[0] : null;
+      if (t) {
+        var keep = function () { t.name = val("name").trim() || t.name; t.date = val("date"); t.tier = val("tier") || t.tier; };
+        if (a === "sub-tick") { keep(); var sb = t.subtasks.filter(function (x) { return x.id === k; })[0]; if (sb) { sb.done = !sb.done; logExtra(sb.done ? 1 : -1); } changed(); taskSheet(t.id); return; }
+        if (a === "sub-del") { keep(); t.subtasks = t.subtasks.filter(function (x) { return x.id !== k; }); changed(); taskSheet(t.id); return; }
+        if (a === "sub-add") { keep(); var tx = val("newsub").trim(); if (tx) { t.subtasks.push({ id: ptUid(), text: tx, done: false }); changed(); } taskSheet(t.id); var ns = sheetEl.querySelector('[name="newsub"]'); if (ns) ns.focus(); return; }
+        if (a === "task-save") { keep(); changed(); closeSheet(); return; }
+        if (a === "task-done") {
+          keep(); var nowDone = ptProgressOf(t) < 100;
+          if (t.subtasks.length) t.subtasks.forEach(function (x) { x.done = nowDone; });
+          t.done = nowDone; t.doneOn = nowDone ? isoDay(new Date()) : null; logExtra(nowDone ? 1 : -1);
+          changed(); closeSheet(); return;
+        }
+        if (a === "task-del") { state.prepTasks = state.prepTasks.filter(function (x) { return x.id !== t.id; }); changed(); closeSheet(); return; }
+      }
+      // coursework
+      var c = s.kind === "cw" ? (state.coursework || []).filter(function (x) { return x.id === s.id; })[0] : null;
+      if (c) {
+        cwSaveFields(c);
+        if (a === "st-tick") { var st = c.stages[Number(k)]; if (st) { st.done = !st.done; logExtra(st.done ? 1 : -1); } }
+        if (a === "st-add") { var sn = val("newstage").trim(); if (sn) c.stages.push({ name: sn, due: "", done: false }); }
+        if (typeof syncCourseworkTasks === "function") syncCourseworkTasks();
+        changed();
+        if (a === "cw-save") closeSheet(); else cwSheet(c.id);
+      }
+    });
+
+    // ---- More: the full app (Mac screens fitted to the phone) ----
+    var FULL = [["dashboard", "🏠", "Home", "Goals, streaks, this week’s plan, milestones"], ["tasks", "✅", "Tasks summary", "All tasks by importance, subtasks"],
+      ["calendar", "🗓️", "Calendar", "Day view with the task set, drag blocks"], ["grades", "📊", "Grades", "Test scores, predicted grades, coursework"],
+      ["links", "🔗", "Websites", "Your study links"], ["settings", "🧰", "Full settings", "Timetable, subjects, weekly plan, features"]];
+    function moreHTML() {
+      return '<div class="ph-hd"><h1>More</h1></div><p class="ph-sub">The full app, fitted to your phone. Changes sync to your Mac.</p><div class="ph-card">' +
+        FULL.filter(function (f) { return f[0] !== "links" || feat("links") !== false; }).map(function (f) {
+          return '<button class="ph-li" data-ph="full" data-id="' + f[0] + '"><span class="i">' + f[1] + "</span><span><b>" + f[2] + "</b><small>" + H(f[3]) + '</small></span><span class="cv">›</span></button>';
+        }).join("") + '</div><p class="ph-ro">Mac-only things (focus blocking, side peek, menu bar) stay hidden.</p>';
+    }
+    var fullBar = document.createElement("div"); fullBar.id = "phFullBar"; document.body.appendChild(fullBar);
+    function enterFull(t) {
+      var f = FULL.filter(function (x) { return x[0] === t; })[0]; if (!f) return;
+      ui.full = t;
+      document.documentElement.classList.add("ibfull");
+      fullBar.innerHTML = '<button data-full="back">‹ More</button><b>' + H(f[2]) + "</b><span></span>";
+      setTab(t); window.scrollTo(0, 0);
+    }
+    function exitFull() {
+      if (!ui.full) return;
+      ui.full = null; document.documentElement.classList.remove("ibfull");
+    }
+    fullBar.addEventListener("click", function (e) { if (e.target.closest('[data-full="back"]')) { exitFull(); goTab("more"); } });
+
     // ---------- shell ----------
     var TABS = [["today", "Today", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>'],
       ["upcoming", "Upcoming", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h3"/></svg>'],
       ["week", "Week", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="4" width="17" height="16.5" rx="3"/><path d="M8 8.5v9M12 8.5v6M16 8.5v8"/></svg>'],
+      ["more", "More", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>'],
       ["settings", "Settings", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>']];
     function phRender() {
       if (!PHONE_Q.matches) return;
       if (root.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) { phChip(); return; }
       var y = scr.scrollTop;
-      scr.innerHTML = ui.tab === "upcoming" ? upcomingHTML() : ui.tab === "week" ? weekHTML() : ui.tab === "settings" ? settingsHTML() : todayHTML();
+      scr.innerHTML = ui.tab === "upcoming" ? upcomingHTML() : ui.tab === "week" ? weekHTML() : ui.tab === "settings" ? settingsHTML() : ui.tab === "more" ? moreHTML() : todayHTML();
       scr.scrollTop = y;
       tabsEl.innerHTML = TABS.map(function (t) { return '<button data-ph="tab" data-id="' + t[0] + '" class="' + (ui.tab === t[0] ? "on" : "") + '">' + t[2] + t[1] + "</button>"; }).join("");
     }
     function goTab(t, secId) {
+      if (typeof exitFull === "function") exitFull();
       ui.tab = t; if (secId) { ui.fold[secId] = true; saveUI(); }
       phRender(); scr.scrollTop = 0;
       if (secId) setTimeout(function () { var el = scr.querySelector('[data-sec="' + secId + '"]'); if (el) el.scrollIntoView({ block: "start" }); }, 30);
@@ -11017,11 +11304,17 @@ html.ibweb #fmAdvCard,html.ibweb #focusBtn,html.ibweb #focusBar,html.ibweb #appC
       if (a === "go-howto") { goTab("settings", "howto"); return; }
       if (a === "signin") { phSignIn(); return; }
       if (a === "sync") { cloudSync(true); phChip(); return; }
-      if (a === "reconnect") { if (!gsiBusy() && !tokenValid()) gsiRequest("reconnect"); else if (tokenValid()) { cloud.needsSignIn = false; cloudSync(false); } phChip(); return; }
+      if (a === "reconnect") { gsiFails = 0; if (!gsiBusy() && !tokenValid()) gsiRequest("reconnect"); else if (tokenValid()) { cloud.needsSignIn = false; cloudSync(false); } phChip(); return; }
       if (a === "signout") { cloudSignOutClicked(); setTimeout(phRender, 50); return; }
       if (a === "use-cloud") { cloudResolve(true); return; }
       if (a === "use-phone") { cloudResolve(false); return; }
       if (a === "day") { ui.weekDay = el.getAttribute("data-iso"); phRender(); return; }
+      if (a === "blk") { if (e.target.closest(".ph-hdl")) return; blockSheet(ui.weekDay, el.getAttribute("data-id")); return; }
+      if (a === "cls") { showToast("🏫", "From your timetable", "Change classes in More → Full settings → Your week."); return; }
+      if (a === "fab-blk") { newBlockSheet(ui.weekDay || isoDay(new Date())); return; }
+      if (a === "fab-add") { addSheet("test"); return; }
+      if (a === "ed") { var ed = el.getAttribute("data-ed") || "", ek = ed.slice(0, 1), eid = ed.slice(2); if (ek === "m") testSheet(eid); else if (ek === "p") taskSheet(eid); else if (ek === "c") cwSheet(eid); return; }
+      if (a === "full") { enterFull(el.getAttribute("data-id")); return; }
       if (a === "pr-on") { prEnable(); return; }
       if (a === "pr-off") { prDisable(); return; }
       if (a === "pr-test") { prTest(); return; }
